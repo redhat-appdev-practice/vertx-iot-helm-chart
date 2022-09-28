@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Release.Name }}
+    app.kubernetes.io/component: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/part-of: {{ .Release.Name }}
+    app.openshift.io/runtime: vertx
+    app.openshift.io/runtime-namespace: rhn-gps-josphill-dev
+  name: {{ .Release.Name }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.replicas }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: {{- template "vertx.iot.demo.rollingUpdatePercent" . }}
+      maxUnavailable: {{- template "vertx.iot.demo.rollingUpdatePercent" . }}
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: {{ .Release.Name }}
+        deploymentconfig: {{ .Release.Name }}
+    spec:
+      containers:
+      - image: {{ .Values.image }}
+        imagePullPolicy: Always
+        name: {{ .Release.Name }}
+        livenessProbe:
+          httpGet:
+            path: /config/env.json
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 2
+          failureThreshold: 2
+        readinessProbe:
+          httpGet:
+            path: /config/env.json
+            port: 8080
+          initialDelaySeconds: 2
+          periodSeconds: 2
+          failureThreshold: 15
+        env:
+        {{- range .Values.env }}
+        - name: {{ .name | quote }}
+          value: {{ .value | quote }}
+        {{- end }}
+        - name: KUBERNETES_NAMESPACE
+          value: {{ .Release.Namespace }}
+        ports:
+        - containerPort: 4321
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        - containerPort: 8778
+          protocol: TCP
+        - containerPort: 9779
+          protocol: TCP
+        - containerPort: 7800
+          protocol: TCP
+        - containerPort: 65432
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}

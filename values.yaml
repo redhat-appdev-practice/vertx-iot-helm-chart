@@ -1,0 +1,26 @@
+replicas: 5
+
+image: quay.io/josphill/vertx-iot-demo:1.0.2
+
+routes:
+- name: vertx-mqtt
+  port: mqtt
+- name: vertx-iot-demo
+  port: http
+
+env:
+- name: VERTX_LOCK_TIMEOUT
+  value: 250
+- name: JGROUPS_HOST
+  value: vertx-iot-demo-cluster
+- name: VERTX_MQTT_TLS
+  value: 'true'
+- name: VERTX_MQTT_PORT
+  value: '443'
+- name: VERTX_WEBSOCKET_URI
+  value: >-
+    https://vertx-iot-demo-vertx-iot-demo.apps.cluster-xbp6n.xbp6n.sandbox2039.opentlc.com/eventbus
+- name: VERTX_MQTT_HOST
+  value: "vertx-mqtt-vertx-iot-demo.apps.cluster-xbp6n.xbp6n.sandbox2039.opentlc.com"
+- name: VERTX_MQTT_PORT
+  value: 443

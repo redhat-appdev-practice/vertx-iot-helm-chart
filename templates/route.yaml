@@ -1,0 +1,30 @@
+{{- range .Values.routes }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/balance: random
+    haproxy.router.openshift.io/disable_cookies: 'true'
+  labels:
+    app: {{ $.Release.Name }}
+    app.kubernetes.io/component: {{ $.Release.Name }}
+    app.kubernetes.io/instance: {{ $.Release.Name }}
+    app.kubernetes.io/name: {{ $.Release.Name }}
+    app.kubernetes.io/part-of: {{ $.Release.Name }}
+    app.openshift.io/runtime-version: 1.0.2
+  name: {{ .name }}
+spec:
+  host: 
+  port:
+    targetPort: {{ .port }}
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: {{ $.Release.Name }}
+    weight: 100
+  wildcardPolicy: None
+status: {}
+{{- end }}
